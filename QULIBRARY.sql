@@ -1,4 +1,4 @@
-------------------------employeeTable-------------------------------------------
+------------------------EmployeeTable-------------------------------------------
 
 CREATE TABLE Employee(
 EID INTEGER ,
@@ -15,55 +15,65 @@ PRIMARY KEY(EID)
 
 CREATE TABLE Book(
 ISBN INTEGER PRIMARY KEY,
-BName VARCHAR(100),
-Author VARCHAR(20) NOT NULL,
+BName VARCHAR(100) UNIQUE ,
 Publisher VARCHAR(50),
 PublishingYear INTEGER,
 PublishingCity VARCHAR(30),
 EditionNo VARCHAR(15),
 Category VARCHAR(50),
-Status VARCHAR(2),
-CallNo VARCHAR(20)
+Status VARCHAR(20),
+CallNo VARCHAR(20) UNIQUE
+);
+
+CREATE TABLE BookAuthor(
+ISBN    INTEGER   , 
+Author   VARCHAR(20),
+FOREIGN KEY(ISBN) REFERENCES Book(ISBN)
 );
 
 CREATE TABLE Recordings(
 RID INTEGER PRIMARY KEY,
-RName VARCHAR(100),
+RName VARCHAR(100) UNIQUE,
 RType VARCHAR(15),
 Publisher VARCHAR(50),
 PublishingYear INTEGER,
 PublishingCity VARCHAR(30),
 Category VARCHAR(50),
 Description VARCHAR(250),
-Status VARCHAR(2),
-CallNo Varchar(20)
+Status VARCHAR(20),
+CallNo Varchar(20) UNIQUE
 );
 
 CREATE TABLE Thesis(
 TID INTEGER PRIMARY KEY,
-TName VARCHAR(100),
-Author VARCHAR(20) NOT NULL,
+TName VARCHAR(100) UNIQUE ,
 Category VARCHAR(50),
 Status VARCHAR(10),
-CallNo varchar(20)
+CallNo varchar(20)UNIQUE
+);
+
+CREATE TABLE ThesisAuthor(
+TID   INTEGER,
+Author  VARCHAR(20),
+PRIMARY KEY(TID)
 );
 
 CREATE TABLE Journal(
 JID INTEGER PRIMARY KEY,
-JTitle VARCHAR(100),
+JTitle VARCHAR(100) UNIQUE,
 JType VARCHAR(50),
 Category VARCHAR(50),
 Status VARCHAR(20),
-CallNo  varchar(20)
+CallNo  varchar(20)UNIQUE
 );
 
 CREATE TABLE Room(
 RNumber INTEGER PRIMARY KEY,
 RType VARCHAR(20),
-Time DATE,
+Time DATETIME,
 Status VARCHAR(20),
 Duration VARCHAR(20),
-Location VARCHAR(20)
+Floor VARCHAR(20)
 );
 ----------------------------------CirculationService---------------------------
 CREATE TABLE CirculationService(
@@ -84,12 +94,12 @@ Privilege INTEGER,
 Status VARCHAR(10),
 Password INTEGER,
 Email VARCHAR(20),
- Phone INTEGER,
+Phone INTEGER,
 JoinDate DATE,
 ExpiryDate DATE,
 City VARCHAR(50),
 Street VARCHAR(50),
-ZIPCode INTEGER
+BuildingNo INTEGER,
 );
 
 --------------------------------Privilege---------------------------------------
@@ -104,17 +114,17 @@ MaxRenewal INTEGER
 
 ---------------------------------Fine-------------------------------------------
 CREATE TABLE Fine(
-Amount INTEGER,
 FServiceNo INTEGER,
+Amount INTEGER,
 Description VARCHAR(250),
 Status VARCHAR(10),
 FOREIGN KEY(FServiceNo) REFERENCES CirculationService(ServiceNo)
 );
 
---------------------------------------LoansTables-------------------------------
+-------------------------------LoansTables--------------------------------------
 CREATE TABLE BookLoan(
 LoanID INTEGER,
-itemID INTEGER,
+ItemID INTEGER,
 StartDate DATE,
 EndDate DATE,
 Status VARCHAR(10),
@@ -138,6 +148,8 @@ EndDate DATE,
 Status VARCHAR(10),
 FOREIGN KEY(LoanID) REFERENCES CirculationService(ServiceNo),
 FOREIGN KEY(ItemID) REFERENCES Thesis(TID) );
+
+
 CREATE TABLE JournalLoan(
 LoanID INTEGER,
 itemID INTEGER,
@@ -146,6 +158,8 @@ EndDate DATE,
 Status VARCHAR(10),
 FOREIGN KEY(LoanID) REFERENCES CirculationService(ServiceNo),
 FOREIGN KEY(ItemID) REFERENCES Journal(JID));
+
+
 CREATE TABLE RoomReservation(
 LoanID INtEGER,
 itemID INTEGER,
@@ -156,13 +170,13 @@ FOREIGN KEY(LoanID) REFERENCES CirculationService(ServiceNo),
 FOREIGN KEY(ItemID) REFERENCES Room(RNumber)
 );
 
----------------------------------InalienableItemsTable--------------------------
+---------------------------InalienableItemsTable--------------------------------
 CREATE TABLE Inalienable(
 Item_ID INTEGER ,
 Name VARCHAR(10),
 Type    varchar(10),
 Status VARCHAR(20),
-CallNo VARCHAR(20),
+CallNo VARCHAR(20)  UNIQUE,
 PRIMARY KEY (Item_ID)
 );
 
@@ -180,6 +194,12 @@ ALTER TABLE MEMBER
 ADD FOREIGN KEY (Privilege) REFERENCES Privilege(PNumber);
 ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD';
 
+
+
+
+---------------------------------INSARTION--------------------------------------
+
+
 insert into employee values (1 , 'lama' , 'mohammed' , '2000-12-05' , 'F' , 0552553843 , 5480);
 insert into employee values (2 , 'noura' , 'ali' , '1995-10-24' , 'F' , 0554433843 , 3720);
 insert into employee values (3 , 'sama' , 'naser' , '1991-09-28' , 'F' , 0552775843 , 10600);
@@ -193,10 +213,10 @@ insert into ROOM values (132 , 'reading' , NULL , 'busy' , '3 HR' , 'F3' );
 insert into ROOM values (121 , 'working' , NULL , 'avaliable' , '5 HR' , 'F2' );
 
 
-insert into privilege values (1 , 'diamond' , '25 day' , 10 , 7);
-insert into privilege values (2 , 'golden' , '20 day' , 7 , 5);
-insert into privilege values (3 , 'selver' , '16 day' , 5 , 4);
-insert into privilege values (4 , 'bronze' , '10 day' , 3 , 3);
+insert into privilege values (1 , 'Staff' , '25 day' , 10 , 7);
+insert into privilege values (2 , 'Undergraduate' , '20 day' , 7 , 5);
+insert into privilege values (3 , 'student' , '16 day' , 5 , 4);
+insert into privilege values (4 , 'community patrons' , '10 day' , 3 , 3);
 
 
 insert into member values (1 , 'ali' , 'rashed' , '1995-12-18' , 'M' , 'staff' , 3 , 'Active' , 199592 , 'ali@gmil.com' , 0547229735 , '2021-03-17' , '2022-02-01' , 'qassim' , 'abubaker' , 124254 );
@@ -297,9 +317,9 @@ where  Status='InActive';
 
 
 CREATE OR REPLACE VIEW vBookStatus AS (
-SELECT BName, Author, Status
-FROM Book
-WHERE Status='available'
+SELECT B.BName, A.Author, B.Status
+FROM Book B , BookAuthor A
+WHERE B.ISBN=A.ISBN AND B.Status='available'
 );
 
 
@@ -307,7 +327,7 @@ WHERE Status='available'
 -------------------------------CentrolAccess------------------------------------
 
 
-CREATE ROLE BookRole IDENTIFIED BY Book123;
+CREATE OR REPLACE ROLE BookRole IDENTIFIED BY Book123;
 GRANT SELECT ON vBookStatus TO BookRole;
 SET ROLE BookRole IDENTIFIED BY Book123;
 CREATE USER A53287 IDENTIFIED BY Aa966;
