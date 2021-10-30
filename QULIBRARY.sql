@@ -75,13 +75,7 @@ Status VARCHAR(20),
 Duration VARCHAR(20),
 Floor VARCHAR(20)
 );
-----------------------------------CirculationService---------------------------
-CREATE TABLE CirculationService(
-ServiceNo INTEGER PRIMARY KEY,
-ServiceType VARCHAR(10),
-MID INTEGER,
-FOREIGN KEY(MID) REFERENCES Member(MID)
-);
+
 -------------------------------------MemberTable-------------------------------
 CREATE TABLE MEMBER(
 MID INTEGER PRIMARY KEY,
@@ -101,8 +95,17 @@ City VARCHAR(50),
 Street VARCHAR(50),
 BuildingNo INTEGER,
 );
+----------------------------------CirculationService---------------------------
+
+CREATE TABLE CirculationService(
+ServiceNo INTEGER PRIMARY KEY,
+ServiceType VARCHAR(10),
+MID INTEGER,
+FOREIGN KEY(MID) REFERENCES Member(MID)
+);
 
 --------------------------------Privilege---------------------------------------
+
 CREATE TABLE Privilege(
 PNumber INTEGER PRIMARY KEY,
 PName VARCHAR(30),
