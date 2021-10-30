@@ -318,8 +318,10 @@ where  Status='InActive';
 
 CREATE OR REPLACE VIEW vBookStatus AS (
 SELECT B.BName, A.Author, B.Status
-FROM Book B , BookAuthor A
-WHERE B.ISBN=A.ISBN AND B.Status='available'
+FROM Book B 
+JOIN BookAuthor A
+ON B.ISBN=A.ISBN
+WHERE B.Status='available'
 );
 
 
@@ -327,10 +329,10 @@ WHERE B.ISBN=A.ISBN AND B.Status='available'
 -------------------------------CentrolAccess------------------------------------
 
 
-CREATE OR REPLACE ROLE BookRole IDENTIFIED BY Book123;
+CREATE ROLE BookRole IDENTIFIED BY Book123;
 GRANT SELECT ON vBookStatus TO BookRole;
 SET ROLE BookRole IDENTIFIED BY Book123;
-CREATE USER A53287 IDENTIFIED BY Aa966;
-GRANT BookRole TO A53287;
+CREATE USER Ahmed38 IDENTIFIED BY Aa966;
+GRANT BookRole TO Ahmed38;
 
 
